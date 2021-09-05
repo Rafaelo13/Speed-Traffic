@@ -97,6 +97,7 @@ public class HashTable {
 		}
 		return false;
 	}
+		
 	
 	public boolean find(int id) {
 		long startTime = System.currentTimeMillis();
@@ -113,6 +114,25 @@ public class HashTable {
 		}
 		return false;
 	}
+	
+	public Car get(int id) {
+		long startTime = System.currentTimeMillis();
+		LinkedList<Car> chain = array[(int)this.hashF.hash(id)];
+		if(chain != null) {
+			for (Car carEval : chain) {
+				if (id == carEval.getId()) {
+					return carEval;
+				}
+			}
+		}
+		try {
+			this.pw.println("Find: "+(System.currentTimeMillis()-startTime)+" ms");
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+
 
 	public void add(Car car) {
 		long startTime = System.currentTimeMillis();

@@ -7,6 +7,7 @@ import com.badlogic.gdx.Input.TextInputListener;
 
 public class CarCount implements TextInputListener {
 	int cars = -1;
+	//boolean 
 	
 	@Override
 	public void input (String text) {
@@ -16,6 +17,7 @@ public class CarCount implements TextInputListener {
 	@Override
 	public void canceled () {
 		Gdx.app.exit();
+		System.out.println("Holi");
 	}
 	
 	public int getCars() {

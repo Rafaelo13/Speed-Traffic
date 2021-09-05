@@ -20,8 +20,17 @@ public class DynamicObject {
         rect.setWidth(img.getWidth());
         rect.setHeight(img.getHeight());
     }
+    
+    public DynamicObject() {
+    	
+    }
 
     //GETTTERS
+    
+    public void setImage(String texturePath) {
+    	imgLoaded = new Texture(texturePath);
+    	
+    }
     public Texture getImage(){
         return imgLoaded;
     }

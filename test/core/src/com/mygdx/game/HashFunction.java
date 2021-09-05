@@ -1,7 +1,7 @@
 package com.mygdx.game;
 
 
-import org.apache.commons.math3.primes.Primes;
+//import org.apache.commons.math3.primes.Primes;
 import java.util.Random;
 
 public class HashFunction {
@@ -11,7 +11,8 @@ public class HashFunction {
 	
 	public HashFunction(int m, int l) {
 		this.m = m;
-		this.p = Primes.nextPrime((int)Math.pow(10,l));
+		//this.p = Primes./*nextPrime*/((int)Math.pow(10,l));
+		this.p = 101;
 		this.a = random.nextInt(p)+1; //max+min -> p-1+1 -> p 
 		this.b = random.nextInt(p-1); // max+min -> p-1+0 -> p
 	}
@@ -24,7 +25,7 @@ public class HashFunction {
 			return Math.abs((val%(p))%(m));
 		}	
 	}
-	
+	/*
 	public void reHash(int m, int l) {
 		this.m = m;
 		this.p = Primes.nextPrime((int)Math.pow(10,l));
@@ -32,6 +33,7 @@ public class HashFunction {
 		this.b = random.nextInt(p-1); // max+min -> p-1+0 -> p
 	}
 
+*/
 	public float getLoadFactor() {
 		return loadFactor;
 	}

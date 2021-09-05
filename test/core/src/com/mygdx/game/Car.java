@@ -1,14 +1,20 @@
 package com.mygdx.game;
 
-public class Car {
+import utility.DynamicObject;
+
+public class Car extends DynamicObject{
 
 	private long tiempoIn;
 	private long tiempoOut;
 	private int id;
 	
-	public Car(int id) {
-		super();
+	public Car(int id, String texturePath) {
+		super(texturePath);
 		this.id = id;
+	}
+	
+	public Car() {
+		
 	}
 	public long getTiempoIn() {
 		return tiempoIn;

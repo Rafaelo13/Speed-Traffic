@@ -34,8 +34,8 @@ public class Main {
 		HashTable ejemplo = new HashTable(5,2);
 		ejemplo.setPw(pw);
 		for(int i =0;i<cant;i++) {
-			Car nuevo = new Car(i);
-			ejemplo.add(nuevo);
+			//Car nuevo = new Car(i);
+			//ejemplo.add(nuevo);
 		}
 		System.out.println("Yo ya me voy");
 		ejemplo.print();

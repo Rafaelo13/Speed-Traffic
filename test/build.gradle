@@ -9,6 +9,9 @@ buildscript {
         google()
     }
     dependencies {
+       	//implementation project(':libs')
+       	compile fileTree(include: ['*.jar'], dir: 'libs')
+       	
         
 
     }
