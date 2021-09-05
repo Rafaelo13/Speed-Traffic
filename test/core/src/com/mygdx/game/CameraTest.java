@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import utility.DynamicObject;
+import utility.Semaforo;
 import utility.ViewPort;
 
 public class CameraTest extends ApplicationAdapter implements InputProcessor {
@@ -33,9 +34,9 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 	Array<DynamicObject> carrosH;
 	Array<DynamicObject> carrosV;
 
-	boolean delete; //dice si se siguen sacando carros o no
- 
-	int carAcomulator; //controlla si la cantidad de carros es la misma que se estipuló en la interfaz
+	boolean delete; // dice si se siguen sacando carros o no
+
+	int carAcomulator; // controlla si la cantidad de carros es la misma que se estipuló en la interfaz
 
 	// elementos carro vertical
 
@@ -51,19 +52,14 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 	ShapeRenderer shapeR;
 
 	// semaforos horizontales
-	DynamicObject semaforoRojoH;
-	DynamicObject semaforoAmarilloH;
-	DynamicObject semaforoVerdeH;
 
-	float currentTimeTraffic;
+	Semaforo semaforoH;
+	Semaforo semaforoV;
 
-	Timer tiempoSemaforos;
+	DynamicObject xd;
 
-	// semaforos horizontales
-	DynamicObject semaforoV;
-	DynamicObject semaforoRojoV;
-	DynamicObject semaforoAmarilloV;
-	DynamicObject semaforoVerdeV;
+	boolean semRojoH;
+	boolean semRojoV;
 
 	@Override
 	public void create() {
@@ -82,7 +78,7 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 		delete = true; // BOOLEANO PARA VERIFICAR SI SE DEBEN SEGUIR CREANDO CARROS O NO
 
 		// Fondo
-		fondo = new DynamicObject("Mapa.jpg");
+		fondo = new DynamicObject("core/assets/Mapa.jpg");
 		fondo.getSprite().setSize(fondo.getImage().getWidth(), fondo.getImage().getHeight());
 		fondo.setPosition(0, 0);
 
@@ -99,40 +95,35 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 		timer = new Timer();
 		listener = new CarCount();
 
-		carAcomulator = -1; //acomulador de carros
-
+		carAcomulator = -1; // acomulador de carros
 
 		Gdx.input.getTextInput(listener, "Dialog Title", "", "Hint Value");
 
 		// semaforos
 
-		semaforoRojoH = createSemaforo("redTrafficLight.png");
-		semaforoRojoH.getSprite().setSize(semaforoRojoH.getImage().getWidth() / 2.5f,
-				semaforoRojoH.getImage().getHeight() / 2.5f);
-		semaforoRojoH.setPosition(184, 420);
+		semaforoH = new Semaforo("redTrafficLight.png", "yellowTrafficLight.png", "greenTrafficLight.png");
 
-		semaforoAmarilloH = createSemaforo("yellowTrafficLight.png");
-		semaforoAmarilloH.getSprite().setSize(semaforoAmarilloH.getImage().getWidth() / 2.5f,
-				semaforoAmarilloH.getImage().getHeight() / 2.5f);
-		semaforoAmarilloH.setPosition(184, 420);
+		semaforoH.getSprite().setSize(semaforoH.getImage().getWidth() / 2.5f, semaforoH.getImage().getHeight() / 2.5f);
+		semaforoH.getSprite2().setSize(semaforoH.getImage2().getWidth() / 2.5f,
+				semaforoH.getImage2().getHeight() / 2.5f);
+		semaforoH.getSprite3().setSize(semaforoH.getImage3().getWidth() / 2.5f,
+				semaforoH.getImage3().getHeight() / 2.5f);
 
-		semaforoVerdeH = createSemaforo("greenTrafficLight.png");
-		semaforoVerdeH.getSprite().setSize(semaforoVerdeH.getImage().getWidth() / 2.5f,
-				semaforoVerdeH.getImage().getHeight() / 2.5f);
-		semaforoVerdeH.setPosition(184, 420);
+		semaforoH.setPosition(358, 419);
 
-		currentTimeTraffic = 0;
-	}
+		semaforoV = new Semaforo("redTrafficLight.png", "yellowTrafficLight.png", "greenTrafficLight.png");
+		semaforoV.getSprite().setSize(semaforoV.getImage().getWidth() / 2.5f, semaforoV.getImage().getHeight() / 2.5f);
+		semaforoV.getSprite2().setSize(semaforoV.getImage2().getWidth() / 2.5f,
+				semaforoV.getImage2().getHeight() / 2.5f);
+		semaforoV.getSprite3().setSize(semaforoV.getImage3().getWidth() / 2.5f,
+				semaforoV.getImage3().getHeight() / 2.5f);
 
-	public DynamicObject createSemaforo(String path) {
-		DynamicObject semaforo = new DynamicObject(path);
-		semaforo.getSprite().setSize(semaforo.getImage().getWidth(), semaforo.getImage().getHeight());
-		semaforo.setPosition(200, 200);
-		return semaforo;
-	}
+		semaforoV.setPosition(428, 410);
+		semaforoV.setOriginCenter();
+		semaforoV.rotate(-90);
 
-	public boolean luzSemaforo(DynamicObject semaforo) {
-		return semaforo.getSprite().getColor() != Color.WHITE;
+		semRojoH = true;
+		semRojoV = false;
 	}
 
 	public DynamicObject createCarroH() {
@@ -151,7 +142,7 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 
 	public DynamicObject createCarroV() {
 		// carro vertical
-		float[] xDirections = { ViewPort.width/2 + 2, ViewPort.width/2 -13 };
+		float[] xDirections = { ViewPort.width / 2 + 2, ViewPort.width / 2 - 13 };
 		DynamicObject carroVertical = new DynamicObject("carroVertical.png");
 		carroVertical.getSprite().setSize(12, 25);
 		carroVMovX = xDirections[MathUtils.random(0, 1)];
@@ -163,6 +154,11 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 		return carroVertical;
 	}
 
+	/*
+	 * public boolean checkOverlaps(DynamicObject car) { for (DynamicObject x :
+	 * carrosH) { //System.out.println("overlap"); return x.overlaps(car); } return
+	 * false; }
+	 */
 	@Override
 	public void render() {
 		ScreenUtils.clear(0, 0, 1, 1);
@@ -171,49 +167,84 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 		cameraMove();
 		camera.update();
 
-		Long currentTime = TimeUtils.nanoTime();		
+		Long currentTime = TimeUtils.nanoTime();
 		if (currentTime - previousTime >= Long.parseLong("1000000000") && carrosH.size <= listener.getCars()
 				&& delete) {
 			DynamicObject carroH = createCarroH();
 			carrosH.add(carroH);
-			
 
 			DynamicObject carroV = createCarroV();
 			carrosV.add(carroV);
 
-
-			carAcomulator ++;
+			carAcomulator++;
 			previousTime = TimeUtils.nanoTime();
-			if(carAcomulator >= listener.getCars()){
+			if (carAcomulator >= listener.getCars()) {
 				delete = false;
 			}
 
 		}
 
-		for (DynamicObject x : carrosH) {
-			x.setX(x.getX() + 1);
+		for (int i = 0; i < carrosH.size; i++) {
+			if (i == 0) {
+				if ((semRojoH && (carrosH.get(i).getX() == 360))) {
+					/*
+					 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
+					 * carrosH.get(i).getX())){ }
+					 */
+					continue;
+				}
+			} else {
+				if ((semRojoH && (carrosH.get(i).getX() == 360))
+						|| carrosH.get(i).getX() + 25 >= carrosH.get(i - 1).getX()) {
+					/*
+					 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
+					 * carrosH.get(i).getX())){ }
+					 */
+					continue;
+				}
+
+			}
+
+			carrosH.get(i).setX(carrosH.get(i).getX() + 1);
 		}
 
-		for (DynamicObject y : carrosV) {
-			y.setY(y.getY() - 1);
+		for (int i = 0; i < carrosV.size; i++) {
+			if (i == 0) {
+				if ((semRojoV && (carrosV.get(i).getY() == 420))) {
+					/*
+					 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
+					 * carrosH.get(i).getX())){ }
+					 */
+					continue;
+				}
+			} else {
+				if ((semRojoV && (carrosV.get(i).getY() == 420))
+						|| carrosV.get(i).getY() - 25 <= carrosV.get(i - 1).getY()) {
+					/*
+					 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
+					 * carrosH.get(i).getX())){ }
+					 */
+					continue;
+				}
+
+			}
+
+			carrosV.get(i).setY(carrosV.get(i).getY() - 1);
 		}
 
-		carroHMovX++;
-
-		carroVMovY--;
+		//
+		// carroVMovY--;
 
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		fondo.draw(batch);
 
-		semaforoRojoH.draw(batch);// dibujar semaforo
-		semaforoAmarilloH.draw(batch);
-		semaforoAmarilloH.getSprite().setAlpha(0);
+		// dibujar semaforo
+		semaforoH.draw(batch);
+		semaforoV.draw(batch);
 
-		semaforoVerdeH.draw(batch);
-		semaforoVerdeH.getSprite().setAlpha(0);
-
-
+		semaforoH.setVerde();
+		semaforoV.setRojo();
 
 		shapeR.setProjectionMatrix(camera.combined);
 		shapeR.begin(ShapeRenderer.ShapeType.Line);
@@ -237,47 +268,43 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 
 		for (DynamicObject carH : carrosH) {
 			if (carH.getX() >= ViewPort.width) {
-				
 
 				carrosH.removeValue(carH, true);
 				carH.dispose();
-				System.out.println("Eliminado");
+				// System.out.println("Eliminado");
 			}
 		}
 
 		for (DynamicObject carV : carrosV) {
 			if (carV.getY() <= -12) {
-				
+
 				carrosV.removeValue(carV, true);
 				carV.dispose();
-				System.out.println("Eliminado");
+				// System.out.println("Eliminado");
 			}
 		}
 
-		// CONTROL DE SEMAFOROS
-		
-		
-		
-		if (currentTimeTraffic == 10) {
-			semaforoRojoH.getSprite().setColor(Color.WHITE);
-			semaforoRojoH.getSprite().setAlpha(0);
-			semaforoAmarilloH.getSprite().setAlpha(1);;
+		// TODO CONTROL DE SEMAFOROS
+
+		if ((int) timer.getDeltaTime() % 5 == 0 && (int) timer.getDeltaTime() % 10 != 0) {
+			semRojoH = true;
+			semRojoV = false;
+		}
+		if ((int) timer.getDeltaTime() % 10 == 0) {
+			semRojoH = false;
+			semRojoV = true;
+
 		}
 
-		if (currentTimeTraffic % 11 == 0) {
-			semaforoAmarilloH.getSprite().setColor(Color.WHITE);
-			semaforoAmarilloH.getSprite().setAlpha(0);
-			semaforoVerdeH.getSprite().setAlpha(1);
+		if (semRojoH && !semRojoV) {
+			semaforoH.setRojo();
+			semaforoV.setVerde();
+		} else {
+			semaforoH.setVerde();
+			semaforoV.setRojo();
 		}
 
-		if(currentTimeTraffic %21 == 0){
-			semaforoVerdeH.getSprite().setColor(Color.WHITE);
-			semaforoVerdeH.getSprite().setAlpha(0);
-			semaforoRojoH.getSprite().setAlpha(1);
-			currentTimeTraffic = 0 ;
-		}
-
-		if (listener.getCars() > -1 && carrosV.size != 0 && carrosV.size != 0) {
+		if (listener.getCars() > -1 && carrosV.size != 0 || carrosH.size != 0) {
 			timer.drawTime(batch);
 		} else {
 			timer.stopTime(batch);
@@ -369,9 +396,7 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 		batch.dispose();
 		fondo.dispose();
 
-		semaforoRojoH.dispose();
-		semaforoAmarilloH.dispose();
-		semaforoVerdeH.dispose();
+		semaforoH.dispose();
 		for (DynamicObject x : carrosH) {
 			x.dispose();
 		}
@@ -383,7 +408,7 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		System.out.println(keycode);
+
 		return false;
 	}
 
@@ -419,7 +444,6 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-
 		return false;
 	}
 
