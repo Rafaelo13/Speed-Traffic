@@ -48,6 +48,7 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 
 	Long previousTime;
 
+	
 	OrthographicCamera camera;
 	float zoom; // sirve para el zoom
 
@@ -67,8 +68,14 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 	int contadorH;
 	int contadorV;
 	
+	long timeMetric;
+	AverageTime tiempoPantalla;
+	
 	@Override
 	public void create() {
+		timeMetric = 0;
+		tiempoPantalla = new AverageTime();
+		
 		contadorH = 0;
 		contadorV = 0;
 		hashH = new HashTable(5, 2);
@@ -183,13 +190,16 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 		Long currentTime = TimeUtils.nanoTime();
 		if (currentTime - previousTime >= Long.parseLong("1000000000") && hashH.getNodos() <= listener.getCars()
 				&& delete) {
-			contadorH++;
+			
 			Car carroH = createCarroH(contadorH);
+			carroH.setTiempoIn();
 			hashH.add(carroH);
-
-			contadorV++;
+			contadorH++;
+			
 			Car carroV = createCarroV(contadorV);
+			carroV.setTiempoIn();
 			hashV.add(carroV);
+			contadorV++;
 
 			carAcomulator++;
 			previousTime = TimeUtils.nanoTime();
@@ -199,56 +209,60 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 
 		}
 
-		for (int i = 0; i < hashH.getNodos(); i++) {
-			if (i == 0) {
-				if ((semRojoH && (hashH.get(i).getX() == 360))) {
-					/*
-					 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
-					 * carrosH.get(i).getX())){ }
-					 */
-					continue;
-				}
-			} else {
-				if ((semRojoH && (hashH.get(i).getX() == 360))
-						|| hashH.get(i).getX() + 25 >= hashH.get(i - 1).getX()) {
-					/*
-					 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
-					 * carrosH.get(i).getX())){ }
-					 */
-					continue;
-				}
 
-			}
-			
+		for (int i = 0; i <= listener.getCars(); i++) {
 			if(hashH.get(i) != null) {
+				if (i == 0) {
+					if ((semRojoH && (hashH.get(i).getX() == 360))) {
+						/*
+						 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
+						 * carrosH.get(i).getX())){ }
+						 */
+						continue;
+					}
+				} else {
+					if ((semRojoH && (hashH.get(i).getX() == 360))	|| (hashH.get(i-1) != null) && (hashH.get(i).getX() + 25 >= hashH.get(i - 1).getX())) {
+						/*
+						 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
+						 * carrosH.get(i).getX())){ }
+						 */
+						continue;
+					}
+				}
+						
 				hashH.get(i).setX(hashH.get(i).getX() + 1);
 			}
 			
+			
+			
 		}
 
-		for (int i = 1; i < hashV.getNodos(); i++) {
-			if (i == 1) {
-				if ((semRojoV && (hashV.get(i).getY() == 420))) {
-					/*
-					 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
-					 * carrosH.get(i).getX())){ }
-					 */
-					continue;
-				}
-			} else {
-				if ((semRojoV && (hashV.get(i).getY() == 420))
-						|| hashV.get(i).getY() - 25 <= hashV.get(i - 1).getY()) {
-					/*
-					 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
-					 * carrosH.get(i).getX())){ }
-					 */
-					continue;
+		for (int i = 0; i <= listener.getCars(); i++) {
+			if(hashV.get(i) != null) {
+				if (i == 0) {					
+					if ((semRojoV && (hashV.get(i).getY() == 420))) {
+						/*
+						 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
+						 * carrosH.get(i).getX())){ }
+						 */
+						continue;
+					}
+				} else {
+					if ((semRojoV && (hashV.get(i).getY() == 420)) ||  (hashV.get(i - 1) != null) && (hashV.get(i).getY() - 25 <= hashV.get(i - 1).getY() )) {
+						/*
+						 * || || checkOverlaps(carrosH.get(i) if(i > 0 && (carrosH.get(i-1).getX() <
+						 * carrosH.get(i).getX())){ }
+						 */
+						continue;
+					}
+
 				}
 
+				hashV.get(i).setY(hashV.get(i).getY() - 1);
 			}
-
-			hashV.get(i).setY(hashV.get(i).getY() - 1);
+			
 		}
+		
 
 		//
 		// carroVMovY--;
@@ -266,39 +280,58 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 
 		shapeR.setProjectionMatrix(camera.combined);
 		shapeR.begin(ShapeRenderer.ShapeType.Line);
+		
+		
+		//TODO DRAW CARROS
+		
+		for (int i = 0 ; i <= listener.getCars() ; i++ ) {
+			
+			if(hashH.get(i) != null) {				
+				hashH.get(i).draw(batch);
 
-		for (int i = 0 ; i < hashH.getNodos() ; i++ ) {
-			hashH.get(i).draw(batch);
+				shapeR.rect(hashH.get(i).getRect().x, hashH.get(i).getRect().y, hashH.get(i).getRect().getWidth(), hashH.get(i).getRect().getHeight());
+				shapeR.setColor(Color.BLUE);
+			}
 
-			shapeR.rect(hashH.get(i).getRect().x, hashH.get(i).getRect().y, hashH.get(i).getRect().getWidth(), hashH.get(i).getRect().getHeight());
-			shapeR.setColor(Color.BLUE);
 		}
 
-		for (int i = 0 ; i < hashV.getNodos() ; i++) {
-			hashV.get(i).draw(batch);
-
-			shapeR.rect(hashV.get(i).getX(), hashV.get(i).getRect().y, hashV.get(i).getRect().getWidth(), hashV.get(i).getRect().getHeight());
-			shapeR.setColor(Color.GREEN);
+		for (int i = 0 ; i <= listener.getCars(); i++) {
+			if(hashV.get(i) != null) {
+				hashV.get(i).draw(batch);
+				shapeR.rect(hashV.get(i).getX(), hashV.get(i).getRect().y, hashV.get(i).getRect().getWidth(), hashV.get(i).getRect().getHeight());
+				shapeR.setColor(Color.GREEN);
+			}
+			
 
 		}
 
-		/////////// ELIMINACION DE CARROS
+		/////////// TODO ELIMINACION DE CARROS
 
-		for (int i = 0 ; i < hashH.getNodos() ; i++) {
-			if (hashH.get(i).getX() >= ViewPort.width) {
-
-				hashH.remove(hashH.get(i));
+		for (int i = 0 ; i <= listener.getCars(); i++) {
+			
+			if (hashH.get(i) != null && hashH.get(i).getX() >= ViewPort.width) {
+					
+				hashH.get(i).setTiempoOut();
+				timeMetric += hashH.get(i).tiempoEnSimulaccion();
+				
 				hashH.get(i).dispose();
-				// System.out.println("Eliminado");
+				hashH.remove(hashH.get(i));
+				
+				 System.out.println("EliminadoH " + i);
 			}
 		}
 
-		for (int i = 0 ; i < hashV.getNodos() ; i++) {
-			if (hashV.get(i).getY() <= -12) {
-
-				hashV.remove(hashV.get(i));
+		for (int i = 0 ; i <= listener.getCars() ; i++) {
+			if (hashV.get(i) != null && hashV.get(i).getY() <= -12) {
+				
+				
+				hashV.get(i).setTiempoOut();
+				timeMetric += hashV.get(i).tiempoEnSimulaccion(); 
+				
 				hashV.get(i).dispose();
-				// System.out.println("Eliminado");
+				hashV.remove(hashV.get(i));
+				
+				 System.out.println("EliminadoV " + i);
 			}
 		}
 
@@ -324,10 +357,14 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 
 		if (listener.getCars() > -1 && carrosV.size != 0 || hashH.getNodos() != 0) {
 			timer.drawTime(batch);
+			tiempoPantalla.drawTime(batch, 0);
 		} else {
 			timer.stopTime(batch);
+			tiempoPantalla.drawFinalTime(batch, (timeMetric/(2* listener.getCars())));
 		}
 
+		
+		
 		batch.end();
 
 		// car rectangle horizontal
@@ -415,14 +452,10 @@ public class CameraTest extends ApplicationAdapter implements InputProcessor {
 		fondo.dispose();
 
 		semaforoH.dispose();
-		for (int i = 0 ; i < hashH.getNodos() ; i++) {
-			hashH.get(i).dispose();
-		}
-		for (int i = 0 ; i < hashV.getNodos() ; i++) {
-			hashV.get(i).dispose();
-		}
+		
 		shapeR.dispose();
 		
+		System.out.println("El tiempo promedio que dura un carro en la simulacion es: " + timeMetric/(listener.getCars()*2) + " ms");
 		//Main.run();
 	}
 

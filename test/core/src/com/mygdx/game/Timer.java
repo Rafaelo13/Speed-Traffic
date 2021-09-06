@@ -19,13 +19,13 @@ public class Timer {
 	public void drawTime(SpriteBatch batch) {
 	    deltaTime += Gdx.graphics.getDeltaTime();
 	    str = "Timer: " + Float.toString(deltaTime);
-	    font.draw(batch, str , 650 , 750);
+	    font.draw(batch, str , 600 , 750);
 	}
 	
 	public void stopTime(SpriteBatch batch) {
 		
 	    str = "Timer: " + Float.toString(deltaTime);
-	    font.draw(batch, str , 650 , 750);
+	    font.draw(batch, str , 600 , 750);
 	}
 
 	public float getDeltaTime(){
